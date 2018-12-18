@@ -47,7 +47,7 @@ mv ${PROTOS_PATH}/google/api/annotations.proto ${DESTINATION_PATH}
 mv ${PROTOS_PATH}/google/api/http.proto ${DESTINATION_PATH}
 
 echo "GENERATING... stubs go"
-find ${PROTOS_PATH} -type f -name "*.proto" -exec protoc -I${PROTOS_PATH} \
+find ${PROTOS_PATH} -type f -name "*.proto" -and -not -path '*/..*' -exec protoc -I${PROTOS_PATH} \
   --proto_path=${PROTOS_PATH} \
   -I${GOPATH}/src \
   -I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
@@ -55,7 +55,7 @@ find ${PROTOS_PATH} -type f -name "*.proto" -exec protoc -I${PROTOS_PATH} \
 	{} \;
 
 echo "GENERATING... reverse-proxy"
-find ${PROTOS_PATH} -type f -name "*.proto" -exec protoc -I${PROTOS_PATH} \
+find ${PROTOS_PATH} -type f -name "*.proto" -and -not -path '*/..*' -exec protoc -I${PROTOS_PATH} \
   --proto_path=${PROTOS_PATH} \
   -I${GOPATH}/src \
   -I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
@@ -63,7 +63,7 @@ find ${PROTOS_PATH} -type f -name "*.proto" -exec protoc -I${PROTOS_PATH} \
 	{} \;
 
 echo "GENERATING... swagger definitions"
-find ${PROTOS_PATH} -type f -name "*.proto" -exec protoc -I${PROTOS_PATH} \
+find ${PROTOS_PATH} -type f -name "*.proto" -and -not -path '*/..*' -exec protoc -I${PROTOS_PATH} \
   --proto_path=${PROTOS_PATH} \
   -I${GOPATH}/src \
   -I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
@@ -133,7 +133,7 @@ LISTEN=$(cat ${CONFIG_FILE} | jq '.gateway | .listen')
 sed ${SED_OPTS} -e "s|\"LISTEN\"|${LISTEN}|" "${DESTINATION_PATH}/grpc-gateway.go"
 
 echo "FIXING PATHS... in auto generated go files"
-PACKAGES=$(find ${PROTOS_PATH} -type f -name "*.proto" -print | xargs grep -E "package( )+[^=\"]*;" -ho | uniq | sed 's/;/ /g')
+PACKAGES=$(find ${PROTOS_PATH} -type f -name "*.proto" -and -not -path '*/..*' -print | xargs grep -E "package( )+[^=\"]*;" -ho | uniq | sed 's/;/ /g')
 for PACKAGE in ${PACKAGES}
 do
   if [[ $PACKAGE != package* ]] && [[ $PACKAGE != google* ]] ; then
